@@ -346,6 +346,10 @@ class IPKernelApp(BaseIPythonApplication, InteractiveShellApp,
             self.log.debug("Closing iopub channel")
             self.iopub_thread.stop()
             self.iopub_thread.close()
+        if self.control_thread and self.control_thread.is_alive():
+            self.log.debug("Closing control thread")
+            self.control_thread.stop()
+            self.control_thread.join()
 
         if self.debugpy_socket and not self.debugpy_socket.closed:
             self.debugpy_socket.close()
@@ -487,7 +491,7 @@ class IPKernelApp(BaseIPythonApplication, InteractiveShellApp,
                                 control_stream=control_stream,
                                 debugpy_stream=debugpy_stream,
                                 debug_shell_socket=self.debug_shell_socket,
-                                shell_stream=shell_stream, 
+                                shell_stream=shell_stream,
                                 control_thread=self.control_thread,
                                 iopub_thread=self.iopub_thread,
                                 iopub_socket=self.iopub_socket,
@@ -512,7 +516,7 @@ class IPKernelApp(BaseIPythonApplication, InteractiveShellApp,
         # but lower priority than anything else (mpl.use() for instance).
         # This only affects matplotlib >= 1.5
         if not os.environ.get('MPLBACKEND'):
-            os.environ['MPLBACKEND'] = 'module://ipykernel.pylab.backend_inline'
+            os.environ['MPLBACKEND'] = 'module://matplotlib_inline.backend_inline'
 
         # Provide a wrapper for :meth:`InteractiveShellApp.init_gui_pylab`
         # to ensure that any exception is printed straight to stderr.
